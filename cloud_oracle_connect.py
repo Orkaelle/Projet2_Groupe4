@@ -14,11 +14,11 @@ cur=conn.cursor()
 #     CODE_POSTAL NUMBER (5)
 # )
 # """
-#Drop table 
-reqst_drop = """
-drop table ville  purge
+# #Drop table 
+# reqst_drop = """
+# drop table ville  purge
 
-"""
+# """
 # execute request
 cur.execute(reqst_drop)
 print("Table Droped")
