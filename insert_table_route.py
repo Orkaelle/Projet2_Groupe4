@@ -27,8 +27,8 @@ path = os.path.join(dir_path, dbName)
 if os.path.exists(path):
     os.remove(path)
 
-db = sqlite3.connect(path)
-cur = db.cursor()
+conn = sqlite3.connect(path)
+cur = conn.cursor()
 cur.execute('CREATE TABLE route (id_route INTEGER AUTO INCREMENT PRIMARY KEY, departure_city TEXT, arrival_city TEXT);')
 codes_pref = [69877,65455,87966,98576,98990,43545,76344]
 '''
@@ -49,8 +49,8 @@ print (routes)
 for r in routes :
     cur.execute('INSERT INTO route(id_route, departure_city, arrival_city) VALUES(?,?,?)', r)
 
-db.commit()
-db.close()
+conn.commit()
+conn.close()
 
 
 
