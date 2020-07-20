@@ -8,30 +8,14 @@ print(conn.version)
 cur=conn.cursor()
 
 
-# Extracting Stations Codes
+# Extracting prefecture codes
 cur.execute('SELECT city_id_pref FROM departement;')
 codes_pref = cur.fetchall()
+print (codes_pref)
 
+# version test
+#codes_pref = [69877,65455,87966,98576,98990,43545,76344]
 
-'''
-# VERSION TEST
-import sqlite3
-import os
-import sys
-
-dbName = 'test.db'
-base_dir = os.path.dirname(sys.argv[0])
-dir_path = os.path.dirname(os.path.realpath(__file__))
-path = os.path.join(dir_path, dbName)
-
-if os.path.exists(path):
-    os.remove(path)
-
-conn = sqlite3.connect(path)
-cur = conn.cursor()
-cur.execute('CREATE TABLE route (id_route INTEGER AUTO INCREMENT PRIMARY KEY, departure_city TEXT, arrival_city TEXT);')
-codes_pref = [69877,65455,87966,98576,98990,43545,76344]
-'''
 
 # Creation dictionary for stations codes
 routes = []

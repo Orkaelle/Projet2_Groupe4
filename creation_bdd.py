@@ -12,18 +12,17 @@ cur=conn.cursor()
 
 creation_table_city = """
     CREATE TABLE city (
-        insee_city INTEGER PRIMARY KEY,
-        city_name TEXT,
-        postcode INTEGER
+        id_city INTEGER PRIMARY KEY,
+        city_name TEXT
     );
 """
 
 creation_table_departement = """
     CREATE TABLE departement (
-        id_departement INTEGER PRIMARY KEY,
-        nom_dpt TEXT,
-        prefecture INTEGER,
-        FOREIGN KEY (prefecture) REFERENCES city (insee_city)
+        id_departement INTEGER(2) PRIMARY KEY,
+        dept_name TEXT,
+        city_id_pref INTEGER,
+        FOREIGN KEY (city_id_pref) REFERENCES city (id_city)
     );
 """
 
@@ -32,6 +31,8 @@ creation_table_station = """
         id_station INTEGER PRIMARY KEY,
         station_name TEXT,
         station_city TEXT,
+        lon REAL,
+        lat REAL, 
         FOREIGN KEY (station_city) REFERENCES city(city_name),
     );
 """
@@ -55,7 +56,7 @@ creation_table_trip = """
         departure_datetime DATETIME,
         arrival_datetime DATETIME,
         duration REAL,
-        co2 INTEGER,
+        co2_emission INTEGER,
         FOREIGN KEY (trip_route) REFERENCES route(id_route),
         FOREIGN KEY (departure_station) REFERENCES station(station_name),
         FOREIGN KEY (arrival_station) REFERENCES station(station_name),
