@@ -1,6 +1,7 @@
 # Imports
 import cx_Oracle
 import requests
+import json
 
 tokenAPI = "91a3c8b6-10a5-454b-8191-4e391dd3ec9f"
 
@@ -23,47 +24,138 @@ print (codes_pref)
 '''
 
 # version test
-routes = [[1, 6088, 10387], [2, 10387, 15014], [3, 6088, 15014], [4, 10387, 15014], [5, 15014, 10387], [6, 15014, 6088]]
+routes = [[1, 6088, 10387], [2, 10387, 15014], [3, 6088, 15014], [4, 10387, 6088], [5, 15014, 10387], [6, 15014, 6088]]
 codes_pref = [6088, 10387, 15014]
 
 
 # Creation departure hypothesis
 id_trip = 1
-for c in codes_pref :
-    hyp = "H" + str(c)
-    datetime = "20200801T060000"
-    print (hyp)
 
-    for r in routes :
-        if r[1] == c :
+c = codes_pref[0]
+depart_datetime = "20200801T060000"
+faster_trip = []
+greener_trip = []
 
-            faster = []
-            greener = []
+print ("\n")
+print ("Test trips from " + str(c))
 
-            depart = r[1]
-            destination = r[2]
-            lien = "https://" + tokenAPI + ":@api.navitia.io/v1/coverage/sncf/journeys?from=admin%3Afr%3A" + str(depart) + "&to=admin%3Afr%3A" + str(destination) + "&datetime=" + datetime + "&max_nb_transfers=2&count=3&"
-            journeys = requests.get (lien).json()['journeys']
-            liste_trajets = []
+for r in routes :
+    if r[1] == c :
+        print ("to " + str(r[2]))
+        liste_trajets = []
 
-            id = 0
+        depart = r[1]
+        destination = r[2]
+
+        lien = "https://" + tokenAPI + ":@api.navitia.io/v1/coverage/sncf/journeys?from=admin%3Afr%3A" + str(depart) + "&to=admin%3Afr%3A" + str(destination) + "&datetime=" + depart_datetime + "&max_nb_transfers=2&count=3&"
+        data = requests.get(lien).json()
+
+        try :
+            journeys = requests.get(lien).json()['journeys']
+            print ("OK : " + str(len(journeys)) + " trips found.")   
+
+            temp_faster_trip = []
+            temp_greener_trip = []
             for j in journeys :
                 duration = j["durations"]["total"]
                 co2 = j["co2_emission"]["value"]
                 arrival_time = j["arrival_date_time"]
-                liste_trajets.append([hyp + "->" + str(destination) + "-" + str(id), duration, co2, arrival_time])
-                id += 1
+                depart_station = j["sections"][0]["to"]["stop_point"]["name"]
+                max_sections = len(j["sections"])-1
+                arrival_station = j["sections"][max_sections]['from']['stop_point']['name']
+                liste_trajets.append([depart, destination, duration, co2, arrival_time, depart_station, arrival_station])
+                temp_faster_trip.append(duration)
+                temp_greener_trip.append(co2)
 
-            temp_faster = []
-            temp_greener = []
-            for l in liste_trajets :
-                temp_faster.append(l[1])
-                temp_greener.append(l[2])
-            index_faster = temp_faster.index(min(temp_faster)))
-            index_greener = temp_greener.index(min(temp_greener)))
 
-            faster.append(liste_trajets[index_faster])
-            greener.append(liste_trajets[index_greener])
+            index_faster_trip = temp_faster_trip.index(min(temp_faster_trip))
+            index_greener_trip = temp_greener_trip.index(min(temp_greener_trip))
+            faster_trip.append(liste_trajets[index_faster_trip])
+            greener_trip.append(liste_trajets[index_greener_trip])
+
+
+        except :
+            try :
+                error = requests.get(lien).json()['error']['message']
+                print (error)
+            except :
+                print ('An error has occured')   
+
+
+temp_faster = []
+temp_greener = []
+
+if (faster_trip) :
+    for f in faster_trip :
+        temp_faster.append(f[2])
+    index_faster = temp_faster.index(min(temp_faster))
+    faster_route = faster_trip[index_faster]
+
+if (greener_trip) :
+    for g in greener_trip :
+        temp_greener.append(f[3])
+    index_greener = temp_greener.index(min(temp_greener))
+    greener_route = greener_trip[index_greener]
+
+print ("Faster route :")
+print (faster_route)
+print ("Greener route :")
+print (greener_route)
+
+depart_datetime_faster = faster_route[4]
+depart_datetime_greener = greener_route[4]
+depart_station_faster = faster_route[6]
+depart_station_greener = greener_route[6]
+depart_pref_faster = faster_route[1]
+depart_pref_greener = greener_route[1]
+
+
+print ('\n')
+print ('from ' + str(depart_station_faster))
+
+for r in routes :
+
+    # Faster
+    if r[1] == depart_pref_faster :
+        print ("to " + str(r[2]))
+        liste_trajets = []
+
+        depart = r[1]
+        destination = r[2]
+
+        lien = "https://" + tokenAPI + ":@api.navitia.io/v1/coverage/sncf/journeys?from=admin%3Afr%3A" + str(depart) + "&to=admin%3Afr%3A" + str(destination) + "&datetime=" + datetime + "&max_nb_transfers=2&count=3&"
+        data = requests.get(lien).json()
+
+        try :
+            journeys = requests.get(lien).json()['journeys']
+            print ("OK : " + str(len(journeys)) + " trips found.")   
+            
+            temp_faster_trip = []
+            temp_greener_trip = []
+            for j in journeys :
+                duration = j["durations"]["total"]
+                co2 = j["co2_emission"]["value"]
+                arrival_time = j["arrival_date_time"]
+                depart_station = j["sections"][0]["to"]["stop_point"]["name"]
+                max_sections = len(j["sections"])-1
+                arrival_station = j["sections"][max_sections]['from']['stop_point']['name']
+                liste_trajets.append([hyp + "->" + str(destination), duration, co2, arrival_time, depart_station, arrival_station])
+                temp_faster_trip.append(duration)
+                temp_greener_trip.append(co2)
+
+
+            index_faster_trip = temp_faster_trip.index(min(temp_faster_trip))
+            index_greener_trip = temp_greener_trip.index(min(temp_greener_trip))
+            faster_trip.append(liste_trajets[index_faster_trip])
+            greener_trip.append(liste_trajets[index_greener_trip])
+
+
+        except :
+            try :
+                error = requests.get(lien).json()['error']['message']
+                print (error)
+            except :
+                print ('An error has occured')   
 
 
 
@@ -73,15 +165,6 @@ for c in codes_pref :
             
 
             
-
-
-
-
-
 
 # conn.commit()
 # conn.close()
-
-
-
-
