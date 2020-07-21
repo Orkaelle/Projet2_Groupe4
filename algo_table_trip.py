@@ -1,5 +1,8 @@
 # Imports
 import cx_Oracle
+import requests
+
+tokenAPI = "91a3c8b6-10a5-454b-8191-4e391dd3ec9f"
 
 '''
 # DataBase Connexion
@@ -25,13 +28,50 @@ codes_pref = [6088, 10387, 15014]
 
 
 # Creation departure hypothesis
-trips = []
 id_trip = 1
-for i in codes_pref :
-    hyp = "H" + str(i)
+for c in codes_pref :
+    hyp = "H" + str(c)
+    datetime = "20200801T060000"
     print (hyp)
-    for j in routes :
-        if j[1] = i :
+
+    for r in routes :
+        if r[1] == c :
+
+            faster = []
+            greener = []
+
+            depart = r[1]
+            destination = r[2]
+            lien = "https://" + tokenAPI + ":@api.navitia.io/v1/coverage/sncf/journeys?from=admin%3Afr%3A" + str(depart) + "&to=admin%3Afr%3A" + str(destination) + "&datetime=" + datetime + "&max_nb_transfers=2&count=3&"
+            journeys = requests.get (lien).json()['journeys']
+            liste_trajets = []
+
+            id = 0
+            for j in journeys :
+                duration = j["durations"]["total"]
+                co2 = j["co2_emission"]["value"]
+                arrival_time = j["arrival_date_time"]
+                liste_trajets.append([hyp + "->" + str(destination) + "-" + str(id), duration, co2, arrival_time])
+                id += 1
+
+            temp_faster = []
+            temp_greener = []
+            for l in liste_trajets :
+                temp_faster.append(l[1])
+                temp_greener.append(l[2])
+            index_faster = temp_faster.index(min(temp_faster)))
+            index_greener = temp_greener.index(min(temp_greener)))
+
+            faster.append(liste_trajets[index_faster])
+            greener.append(liste_trajets[index_greener])
+
+
+
+
+
+
+            
+
             
 
 
