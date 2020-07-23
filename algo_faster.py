@@ -2,8 +2,9 @@ import cx_Oracle
 import requests
 import datetime
 
-
-tokenAPI = "91a3c8b6-10a5-454b-8191-4e391dd3ec9f"
+token = ["2e205281-070a-4755-a703-52fa77a9c943","9e78ab8f-aa47-4261-a036-566f67929ada","9bf360f1-dcb2-40f2-acc3-dee3f60c8f20","91a3c8b6-10a5-454b-8191-4e391dd3ec9f"]
+index_token = 0
+tokenAPI = token[index_token]
 
 
 # DataBase Connexion
@@ -12,14 +13,15 @@ print(conn.version)
 cur=conn.cursor()
 
 # Extracting prefecture codes
-cur.execute('SELECT city_id_pref FROM departement')
+cur.execute('SELECT city_id_pref FROM departementmetro')
 result = cur.fetchall()
 codes_pref = []
 for r in result :
     codes_pref.append(r[0])
 
-# Find Paris Code :
-index_paris = codes_pref.index(75056)
+
+# Find start Code :
+index_start = codes_pref.index(29232) #Quimper
 
 '''
 # test version
@@ -27,7 +29,7 @@ codes_pref = [6088, 10387, 15014, 59350]
 '''
 
 # start point
-start_from = codes_pref[index_paris]
+start_from = codes_pref[index_start]
 start_time = "20200801T060000"
 
 print ('\n')
@@ -53,7 +55,18 @@ for c in codes_pref :
     data = requests.get(lien).json()
 
     try :
-        journeys = requests.get(lien).json()['journeys']
+        message = data['message']
+        print(message)
+        print ('Retry with another token...')
+        tokenAPI = token[index_token+1]
+        lien = "https://" + tokenAPI + ":@api.navitia.io/v1/coverage/sncf/journeys?from=admin%3Afr%3A" + depart + "&to=admin%3Afr%3A" + destination + "&datetime=" + depart_datetime + "&max_nb_transfers=2&count=3&"
+        data = requests.get(lien).json()
+
+
+    except :
+        print ("")
+    try :
+        journeys = data['journeys']
         print (str(len(journeys)) + " trips found.")
 
         for j in journeys :
@@ -121,7 +134,19 @@ while codes_pref != [] :
         data = requests.get(lien).json()
 
         try :
-            journeys = requests.get(lien).json()['journeys']
+            message = data['message']
+            print(message)
+            print ('Retry with another token...')
+            tokenAPI = token[index_token+1]
+            lien = "https://" + tokenAPI + ":@api.navitia.io/v1/coverage/sncf//journeys?from=" + depart + "&to=admin%3Afr%3A" + destination + "&max_nb_transfers=2&count=3&datetime=" + depart_datetime + "&datetime_represents=departure&"
+            data = requests.get(lien).json()
+
+
+        except :
+            print ("")
+
+        try :
+            journeys = data['journeys']
             print (str(len(journeys)) + " trips found.")
 
             for j in journeys :
@@ -144,10 +169,14 @@ while codes_pref != [] :
 
         except :
             try :
-                error = requests.get(lien).json()['error']['message']
-                print (error)
+                message = requests.get(lien).json()['message']
+                print(message)
             except :
-                print ('ERROR')
+                try :
+                    error = requests.get(lien).json()['error']['message']
+                    print (error)
+                except :
+                    print ('ERROR')
         
     temp.clear()
 
@@ -168,10 +197,3 @@ while codes_pref != [] :
 print ('\n\n')
 print ('Faster route :')
 print (faster_route)
-
-
-
-
-
-    
-
