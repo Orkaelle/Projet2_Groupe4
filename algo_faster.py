@@ -5,23 +5,29 @@ import datetime
 
 tokenAPI = "91a3c8b6-10a5-454b-8191-4e391dd3ec9f"
 
-'''
+
 # DataBase Connexion
 conn = cx_Oracle.connect("admin", "Simplon.co63", "simplon_high")
 print(conn.version)
 cur=conn.cursor()
 
 # Extracting prefecture codes
-cur.execute('SELECT city_id_pref FROM departement;')
-codes_pref = cur.fetchall()
-print (codes_pref)
-'''
+cur.execute('SELECT city_id_pref FROM departement')
+result = cur.fetchall()
+codes_pref = []
+for r in result :
+    codes_pref.append(r[0])
 
+# Find Paris Code :
+index_paris = codes_pref.index(75056)
+
+'''
 # test version
 codes_pref = [6088, 10387, 15014, 59350]
+'''
 
 # start point
-start_from = codes_pref[0]
+start_from = codes_pref[index_paris]
 start_time = "20200801T060000"
 
 print ('\n')
@@ -145,18 +151,23 @@ while codes_pref != [] :
         
     temp.clear()
 
-    for f in faster_trip :
-        temp.append(f[5])
-    index_faster = temp.index(min(temp))
-    faster_route.append(faster_trip[index_faster])
+    if faster_trip != [] :
+        for f in faster_trip :
+            temp.append(f[5])
+        index_faster = temp.index(min(temp))
+        faster_route.append(faster_trip[index_faster])
 
-    print ("Next faster route :")
-    print (faster_route[-1])
+        print ("Next faster route :")
+        print (faster_route[-1])
+    else :
+        print ('No trip found for this route !')
+        print ('\n')
+
+
 
 print ('\n\n')
 print ('Faster route :')
 print (faster_route)
-
 
 
 
