@@ -5,6 +5,7 @@ import cx_Oracle
 conn = cx_Oracle.connect("admin", "Simplon.co63", "simplon_high")
 print(conn.version)
 cur=conn.cursor()
+# Creation DataBase Schema
 reqst = open('installation_schema.sql', 'r', encoding='utf-8')
 full_reqst = reqst.read()
 queries = full_reqst.split(';')
