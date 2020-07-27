@@ -1,8 +1,9 @@
 import cx_Oracle
 import requests
 import datetime
+import csv
 
-token = ["2e205281-070a-4755-a703-52fa77a9c943","9e78ab8f-aa47-4261-a036-566f67929ada","9bf360f1-dcb2-40f2-acc3-dee3f60c8f20","91a3c8b6-10a5-454b-8191-4e391dd3ec9f"]
+token = ["72078fc4-5d1e-40f0-a5b0-6d29d8bb4af1","dd7fc13b-20c4-43b7-bee6-1995b3d77a60","2e205281-070a-4755-a703-52fa77a9c943","9e78ab8f-aa47-4261-a036-566f67929ada","9bf360f1-dcb2-40f2-acc3-dee3f60c8f20","91a3c8b6-10a5-454b-8191-4e391dd3ec9f"]
 index_token = 0
 tokenAPI = token[index_token]
 
@@ -21,7 +22,12 @@ for r in result :
 
 
 # Find start Code :
-index_start = codes_pref.index(29232) #Quimper
+index_start = codes_pref.index(5061) #Gap
+
+# Priorities
+priorities = ['2408', '5061', '26198', '23096', '60057', '4112']
+priority_trips = []
+
 
 '''
 # test version
@@ -30,7 +36,7 @@ codes_pref = [6088, 10387, 15014, 59350]
 
 # start point
 start_from = codes_pref[index_start]
-start_time = "20200801T060000"
+start_time = "20200803T060000"
 
 print ('\n')
 print ('Start from ' + str(start_from))
@@ -61,10 +67,9 @@ for c in codes_pref :
         tokenAPI = token[index_token+1]
         lien = "https://" + tokenAPI + ":@api.navitia.io/v1/coverage/sncf/journeys?from=admin%3Afr%3A" + depart + "&to=admin%3Afr%3A" + destination + "&datetime=" + depart_datetime + "&max_nb_transfers=2&count=3&"
         data = requests.get(lien).json()
-
-
     except :
-        print ("")
+        nada = []
+    
     try :
         journeys = data['journeys']
         print (str(len(journeys)) + " trips found.")
@@ -78,12 +83,13 @@ for c in codes_pref :
 
         duration = journeys[index_faster]["durations"]["total"]
         co2 = journeys[index_faster]["co2_emission"]["value"]
+        departure_time = journeys[index_faster]["departure_date_time"]
         arrival_time = journeys[index_faster]["arrival_date_time"]
         depart_station = journeys[index_faster]["sections"][0]["to"]['stop_point']['stop_area']['id'].replace(':','%3A')
         max_sections = len(journeys[index_faster]["sections"])-1
         arrival_station = journeys[index_faster]["sections"][max_sections]['from']['stop_point']['stop_area']['id'].replace(':','%3A')
 
-        faster_trip.append([depart, depart_station, destination, arrival_station, duration, arrival_time, co2])
+        faster_trip.append([depart, depart_station, destination, arrival_station, departure_time, duration, arrival_time, co2])
 
         print ("Faster trip saved.")
 
@@ -95,10 +101,24 @@ for c in codes_pref :
             print ('ERROR')
     
 temp.clear()
+priority_trips.clear()
+
 
 for f in faster_trip :
-    temp.append(f[5])
-index_faster = temp.index(min(temp))
+    if f[2] in priorities :
+        priority_trips.append([faster_trip.index(f), f[6]])
+    else :
+        temp.append(f[6])
+
+if priority_trips != [] :
+    temp.clear()
+    for p in priority_trips :
+        temp.append(p[1])
+    index_priority = temp.index(min(temp))
+    index_faster = priority_trips[index_priority][0]
+else :
+    index_faster = temp.index(min(temp))
+
 faster_route.append(faster_trip[index_faster])
 
 print ("Starter faster route :")
@@ -112,7 +132,7 @@ while codes_pref != [] :
 
     depart_pref = faster_route[-1][2]
     depart_station = faster_route[-1][3]
-    depart_time = faster_route[-1][5]
+    depart_time = faster_route[-1][6]
 
     print ('\n')
     print ('Next step from ' + str(depart_pref))
@@ -143,7 +163,7 @@ while codes_pref != [] :
 
 
         except :
-            print ("")
+            nada = []
 
         try :
             journeys = data['journeys']
@@ -158,12 +178,13 @@ while codes_pref != [] :
 
             duration = journeys[index_faster]["durations"]["total"]
             co2 = journeys[index_faster]["co2_emission"]["value"]
+            departure_time = journeys[index_faster]["departure_date_time"]
             arrival_time = journeys[index_faster]["arrival_date_time"]
             depart_station = journeys[index_faster]["sections"][0]["to"]['stop_point']['stop_area']['id'].replace(':','%3A')
             max_sections = len(journeys[index_faster]["sections"])-1
             arrival_station = journeys[index_faster]["sections"][max_sections]['from']['stop_point']['stop_area']['id'].replace(':','%3A')
 
-            faster_trip.append([depart_pref, depart_station, destination, arrival_station, duration, arrival_time, co2])
+            faster_trip.append([depart_pref, depart_station, destination, arrival_station, departure_time, duration, arrival_time, co2])
 
             print ("Faster trip saved.")
 
@@ -179,15 +200,34 @@ while codes_pref != [] :
                     print ('ERROR')
         
     temp.clear()
+    priority_trips.clear()
 
-    if faster_trip != [] :
+    if faster_trip :
         for f in faster_trip :
-            temp.append(f[5])
-        index_faster = temp.index(min(temp))
+            if f[2] in priorities :
+                priority_trips.append([faster_trip.index(f), f[6]])
+            temp.append(f[6])
+        
+        if priority_trips :
+            print (priority_trips)
+            temp.clear()
+            for p in priority_trips :
+                temp.append(p[1])
+            index_priority = temp.index(min(temp))
+            index_faster = priority_trips[index_priority][0]
+        else :
+            index_faster = temp.index(min(temp))
+
+
         faster_route.append(faster_trip[index_faster])
 
         print ("Next faster route :")
         print (faster_route[-1])
+
+        with open('faster.csv', 'w', newline='') as f :
+            writer = csv.writer(f)
+            writer.writerows(faster_route)
+    
     else :
         print ('No trip found for this route !')
         print ('\n')
