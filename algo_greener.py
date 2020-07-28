@@ -94,7 +94,7 @@ for c in codes_pref:
             "&to=admin%3Afr%3A" + destination + "&datetime=" + depart_datetime + "&max_nb_transfers=2&count=3&"
         data = requests.get(lien).json()
     except BaseException:
-        nada = []
+        pass
 
     try:
         journeys = data['journeys']
@@ -199,7 +199,7 @@ while codes_pref != []:
             data = requests.get(lien).json()
 
         except BaseException:
-            nada = []
+            pass
 
         try:
             journeys = data['journeys']

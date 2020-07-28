@@ -17,7 +17,7 @@ token = [
     "9d8450f6-354d-4c82-ba48-771ebb775d7d",
     "35c22f68-836c-4170-80c2-ad26ffe8527f",
     "72078fc4-5d1e-40f0-a5b0-6d29d8bb4af1"]
-index_token = 0
+index_token = 4
 tokenAPI = token[index_token]
 
 
@@ -77,7 +77,7 @@ for c in codes_pref:
             "&to=admin%3Afr%3A" + destination + "&datetime=" + depart_datetime + "&max_nb_transfers=2&count=3&"
         data = requests.get(lien).json()
     except BaseException:
-        nada = []
+        pass
 
     try:
         journeys = data['journeys']
@@ -183,7 +183,7 @@ while codes_pref != []:
             data = requests.get(lien).json()
 
         except BaseException:
-            nada = []
+            pass
 
         try:
             journeys = data['journeys']
