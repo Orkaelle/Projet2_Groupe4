@@ -20,5 +20,5 @@ cur=conn.cursor()
 
 # """
 # execute request
-cur.execute(reqst_drop)
+# cur.execute(reqst_drop)
 print("Table Droped")
