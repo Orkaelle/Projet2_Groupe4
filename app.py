@@ -7,15 +7,15 @@ from flask import Flask, render_template,url_for
 app = Flask(__name__)
 @app.route('/')
 def index ():
-    return '<img  src = "'+url_for('static', filename='demo-screen-1.jpg') +'" alt= "logo sncf"></br> <a href="'+ url_for("shortest")+'"><h3> Fast Route</h3> </a></br><a href="'+ url_for("co2_emission")+'"><<h3> Co2 Emission</h3> </a>'
+    return '<img  src = "'+url_for('static', filename='demo-screen-1.jpg') +'" alt= "logo sncf"></br> <a href="'+ url_for("faster")+'"><h3> Faster Route</h3> </a></br><a href="'+ url_for("greener")+'"><<h3>Greener Route</h3> </a>'
 
 
-@app.route('/shortest')
-def shortest():
-    return render_template ('shortestpath.html')
-@app.route('/Co2')
-def co2_emission():
-    return render_template ('co2_emission.html')
+@app.route('/faster')
+def faster():
+    return render_template ('faster.html')
+@app.route('/greener')
+def greener():
+    return render_template ('greener.html')
     
     
 
