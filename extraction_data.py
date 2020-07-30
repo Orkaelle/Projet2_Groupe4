@@ -87,9 +87,4 @@ print("Insert completed")
   
 
 
-# lien1 = "https://9bf360f1-dcb2-40f2-acc3-dee3f60c8f20:@api.navitia.io/v1/coverage/sncf/journeys?from=admin%3Afr%3A69123&to=admin%3Afr%3A75056&datetime=20200826T000000&"
-# list_trajet= []
-# list_trajet = requests.get(lien1).json()['journeys']
-# pprint.pprint(list_trajet[0]['sections'][1])
-
 
